@@ -1,6 +1,6 @@
 import {
     Grid,
-    Card, Button, Icon, FormControlLabel, Checkbox, MenuItem, FormControl, InputAdornment,
+    Card, Button, Icon,
 } from '@mui/material'
 import {styled} from '@mui/system'
 import React, {useState} from 'react'
@@ -9,8 +9,6 @@ import axios from "../../../../axios";
 import {Span} from "../../../helpers/components/Typography";
 import {useNavigate} from "react-router-dom";
 import {useSnackbar} from "notistack";
-import Select from "@mui/material/Select";
-import InputLabel from "@mui/material/InputLabel";
 
 const TextField = styled(TextValidator)(() => ({
     width: '100%',

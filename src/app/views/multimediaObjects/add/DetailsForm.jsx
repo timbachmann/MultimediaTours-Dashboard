@@ -1,6 +1,6 @@
 import {
     Grid,
-    Card, Button, Icon, FormControlLabel, Checkbox, InputAdornment, FormControl, MenuItem,
+    Card, Button, Icon, Checkbox, FormControl, MenuItem,
 } from '@mui/material'
 import {Box, styled} from '@mui/system'
 import React, {useState} from 'react'

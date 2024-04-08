@@ -2,10 +2,7 @@ import * as React from 'react';
 import {createSearchParams, useNavigate} from 'react-router-dom'
 import AddIcon from "@mui/icons-material/Add";
 import axios from "../../../../../axios";
-import MaterialTable, {MTableBodyRow, MTableFilterRow} from "@material-table/core";
-import ExportPdf from "@material-table/exporters/pdf";
-import ExportCsv from "@material-table/exporters/csv";
-import {de} from "date-fns/locale";
+import MaterialTable, {MTableBodyRow} from "@material-table/core";
 
 const NewsletterTable = ({title}) => {
     let navigate = useNavigate();
