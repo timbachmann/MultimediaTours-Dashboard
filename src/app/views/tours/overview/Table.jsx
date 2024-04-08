@@ -1,7 +1,6 @@
 import * as React from 'react';
 import MaterialTable, {MTableBodyRow} from "@material-table/core";
 import {createSearchParams, useNavigate} from 'react-router-dom'
-import {H2} from "../../../helpers/components/Typography";
 import AddIcon from "@mui/icons-material/Add";
 
 const EnhancedTable = ({title, tours}) => {

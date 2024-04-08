@@ -22,11 +22,11 @@ const AppTable = () => {
             <div className="breadcrumb">
                 <Breadcrumb
                     routeSegments={[
-                        { name: 'User' },
+                        { name: 'Settings' },
                     ]}
                 />
             </div>
-                <Table title="User" />
+                <Table title="User Management" />
         </Container>
     )
 }

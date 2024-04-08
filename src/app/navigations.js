@@ -17,17 +17,10 @@ export const navigations = [
         auth: authRoles.admin,
     },
     {
-        name: 'Userverwaltung',
-        icon: 'account_circle',
+        name: 'Settings',
+        icon: 'settings',
         path: '/admin/user',
         auth: authRoles.admin,
 
     },
-    {
-        name: 'Einstellungen',
-        icon: 'settings',
-        path: '/admin/settings',
-        auth: authRoles.admin,
-
-    }
 ]

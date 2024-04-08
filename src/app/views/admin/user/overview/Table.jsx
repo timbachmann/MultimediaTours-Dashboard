@@ -12,27 +12,13 @@ const NewsletterTable = ({title}) => {
     const [user, setUser] = React.useState([]);
 
     React.useEffect(() => {
-        async function getNewsletter() {
-            axios.get(process.env.REACT_APP_BACKEND_URI + '/user')
-                .then((response) => {
-                    setUser(response.data.map((u) => {
-                        let date = new Date(u.lastLogin);
-                        return ({
-                            _id: u._id,
-                            email: u.email,
-                            lastLogin: u.lastLogin === undefined ? "-" : (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + "." + (date.getMonth() < 9 ? "0" + (date.getMonth()+1) : (date.getMonth()+1)) + "." + date.getFullYear() + " " + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()),
-                            firstname: u.firstName,
-                            name: u.name,
-                            locked: u.locked ? "Ja" : "Nein"
-                        });
-                    }));
-                })
-                .catch((error) => {
-                    console.log(error);
-                })
-        }
-
-        getNewsletter()
+        axios.get(process.env.REACT_APP_BACKEND_URI + '/users')
+            .then((response) => {
+                setUser(response.data);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
     }, []);
 
 
@@ -52,73 +38,35 @@ const NewsletterTable = ({title}) => {
     const headCells = [
         {
             field: 'email',
-            title: 'E-Mail',
-        },
-        {
-            field: 'firstname',
-            title: 'Vorname',
-        },
-        {
-            field: 'name',
-            title: 'Name'
+            title: 'Email',
         },
         {
             field: 'lastLogin',
-            title: 'Letzter Login',
+            title: 'Last Login',
             type: 'date'
         },
         {
-            field: 'locked',
-            title: 'Gesperrt'
-        }
+            field: 'role',
+            title: 'Role',
+            lookup: {
+                ADMIN: "Admin",
+                VIEW: "View"
+            }
+        },
     ];
 
     return (
         <MaterialTable
-            localization={{
-                pagination: {
-                    labelDisplayedRows: '{from}-{to} von {count}',
-                    labelRowsPerPage: 'Zeilen pro Seite',
-                    labelRows: 'Zeilen',
-                },
-                toolbar: {
-                    nRowsSelected: '{0} Zeilen ausgewählt',
-                    searchPlaceholder: 'Suchen',
-                    searchTooltip: 'Suche',
-                },
-                header: {
-                    actions: ''
-                },
-                grouping: {
-                    placeholder: 'Spalten zum Gruppieren hier ablegen'
-                },
-                body: {
-                    emptyDataSourceMessage: 'Keine Einträge',
-                    filterRow: {
-                        filterTooltip: 'Filter'
-                    }
-                }
-            }}
             components={{
                 Row: (props) => {
                     return <MTableBodyRow {...props} onRowClick={onRowClicked} />;
-                },
-                FilterRow: (props) => {
-                    return (
-                        <MTableFilterRow
-                            {...props}
-                            localization={{
-                                dateTimePickerLocalization: de,
-                            }}
-                        />
-                    );
                 },
             }}
             title={title}
             actions={[
                 {
                     icon: AddIcon,
-                    tooltip: "User erstellen",
+                    tooltip: "Add User",
                     isFreeAction: true,
                     onClick: handleCreate,
                 },
@@ -126,24 +74,13 @@ const NewsletterTable = ({title}) => {
             style={{padding: '20px 24px', borderRadius: '8px'}}
             options={{
                 search: true,
-                filtering: true,
+                filtering: false,
                 selection: false,
                 searchFieldStyle: {
                     marginRight: '12px',
                 },
                 searchFieldVariant: "outlined",
-                exportMenu: [
-                    {
-                        label: "PDF",
-                        exportFunc: (cols, datas) => ExportPdf(cols, datas, `${title}`),
-                    },
-                    {
-                        label: "CSV",
-                        exportFunc: (cols, datas) => ExportCsv(cols, datas, `${title}`),
-                    }
-                ],
-                pageSize: user.length < 20 ? user.length : 20,
-                pageSizeOptions: [5, 10, 20, 50, { value: user.length, label: "Alle anzeigen" }]
+                pageSizeOptions: [5, 10, 20, 50]
             }}
             columns={headCells}
             data={user}/>

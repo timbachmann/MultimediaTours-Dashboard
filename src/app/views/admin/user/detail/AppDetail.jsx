@@ -42,14 +42,14 @@ const AppDetail = () => {
             <div className="breadcrumb">
                 <Breadcrumb
                     routeSegments={[
-                        { name: 'Nutzer', path: '/admin/user' },
+                        { name: 'User', path: '/admin/user' },
                         { name: 'Details'}
                     ]}
                 />
             </div>
-            <DetailsForm title={"Nutzer"} userObject={user}>
+            <DetailsForm title={"User"} userObject={user}>
             </DetailsForm>
-            <PasswordForm title={"Passwort aktualisieren"} user={user}>
+            <PasswordForm title={"Update Password"} user={user}>
             </PasswordForm>
         </Container>
     )

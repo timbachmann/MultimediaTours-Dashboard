@@ -76,21 +76,15 @@ const DetailsForm = ({pageTitle, tour}) => {
     }
 
     const handleDelete = () => {
-        async function deleteCamp() {
-            axios.delete(process.env.REACT_APP_BACKEND_URI + `/tours/${id}`)
-                .then(() => {
-                    enqueueSnackbar("Tour was deleted successfully!", {variant: "info"})
-                    navigate('/tours');
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
-        }
-
-        deleteCamp();
+        axios.delete(process.env.REACT_APP_BACKEND_URI + `/tours/${id}`)
+            .then(() => {
+                enqueueSnackbar("Tour deleted successfully!", {variant: "info"})
+                navigate('/tours');
+            })
+            .catch((error) => {
+                console.log(error)
+            });
     };
-
-    console.log(tour)
 
     const {
         id = tour.id,
@@ -128,7 +122,7 @@ const DetailsForm = ({pageTitle, tour}) => {
                             <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
                                 <TextField
                                     type="text"
-                                    name="name"
+                                    name="title"
                                     id="standard-basic"
                                     onChange={handleChange}
                                     value={title || ''}

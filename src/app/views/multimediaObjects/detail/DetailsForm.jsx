@@ -3,7 +3,7 @@ import {
     Card, Dialog, Button, MenuItem, FormControl, Checkbox,
 } from '@mui/material'
 import {Box, styled} from '@mui/system'
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator'
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns'
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider'
@@ -24,7 +24,7 @@ import Select from "@mui/material/Select";
 import {parseISO} from "date-fns";
 import FileInput from "./FileUpload";
 import {H3, H6} from "../../../helpers/components/Typography";
-import {multimediaTypes} from "../../../helpers/utils/constant";
+import {multimediaTypes, multimediaTypesInput} from "../../../helpers/utils/constant";
 
 const TextField = styled(TextValidator)(() => ({
     width: '100%',
@@ -54,11 +54,17 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
     const [state, setState] = useState([])
     const [disabled, setDisabled] = useState(true)
     const navigate = useNavigate();
-    const [multimediaTypeOptions] = React.useState(multimediaTypes);
-    const [isPositionChecked, setIsPositionChecked] = useState(true);
+    const [multimediaTypeOptions] = React.useState(multimediaTypesInput);
+    const [isPositionChecked, setIsPositionChecked] = useState(false);
     const [open, setOpen] = React.useState(false);
     const [file, setFile] = React.useState(null);
     const {enqueueSnackbar} = useSnackbar();
+
+    useEffect(() => {
+        if (multimediaObject.position) {
+            setIsPositionChecked(multimediaObject.position);
+        }
+    }, [multimediaObject.position]);
 
     const handleDelete = () => {
         setOpen(true);
@@ -75,19 +81,24 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
                 title: title,
                 date: date,
                 source: source,
-                position: {
-                    lat: latitude,
-                    lng: longitude,
-                    bearing: bearing,
-                    yaw: yaw,
-                },
                 data: data,
                 author: author,
+                ...{
+                    ...isPositionChecked &&
+                    {
+                        position: {
+                            lat: latitude,
+                            lng: longitude,
+                            bearing: bearing,
+                            yaw: yaw,
+                        }
+                    }
+                }
             }
             axios.put(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${id}`, updatedMultimediaObject)
                 .then(() => {
                     setDisabled(true);
-                    enqueueSnackbar('Erfolgreich gespeichert!', {variant: 'success'});
+                    enqueueSnackbar('Saved successfully!', {variant: 'success'});
                 })
                 .catch((error) => {
                     console.log(error);
@@ -130,18 +141,18 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
     };
 
     const handleDeleteTrue = () => {
-        async function deleteCamp() {
-            axios.delete(process.env.REACT_APP_BACKEND_URI + `/camp/${id}`)
+        async function deleteObject() {
+            axios.delete(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${id}`)
                 .then(() => {
-                    enqueueSnackbar("Das Camp wurde erfolgreich gelöscht", {variant: "info"})
-                    navigate('/camps/overview');
+                    enqueueSnackbar("Object deleted successfully!", {variant: "info"})
+                    navigate('/multimedia-objects');
                 })
                 .catch((error) => {
                     console.log(error)
                 })
         }
 
-        deleteCamp();
+        deleteObject();
     };
 
     async function uploadFile() {
@@ -153,7 +164,7 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
 
         axios.post(process.env.REACT_APP_BACKEND_URI + "/file", formData)
             .then(() => {
-                enqueueSnackbar("Datei erfolgreich hochgeladen!", {variant: 'success'})
+                enqueueSnackbar("Uploaded successfully!", {variant: 'success'})
                 navigate({
                     pathname: '/dashboard'
                 })
@@ -171,7 +182,6 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
         title = multimediaObject.title,
         date = multimediaObject.date,
         source = multimediaObject.source,
-        position = multimediaObject.position,
         latitude = multimediaObject.position?.lat,
         longitude = multimediaObject.position?.lng,
         bearing = multimediaObject.position?.bearing,
@@ -305,7 +315,7 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
 
                             <FormContainer sx={{mt: 4, mb: 2, pl: 7, width: '100%'}}>
                                 <H6>{'Position'}</H6>
-                                <Checkbox checked={isPositionChecked} onChange={handleIsPositionCheckedChange}/>
+                                <Checkbox checked={isPositionChecked} disabled={disabled} onChange={handleIsPositionCheckedChange}/>
                             </FormContainer>
 
                             {isPositionChecked && (
@@ -370,25 +380,44 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
                                     </Grid>
                                 </Grid>
                             )}
+                        </Grid>
 
-                            <FormContainer sx={{mt: 4, mb: 2, pl: 7, width: '100%'}}>
-                                <H6>{multimediaTypeOptions.find(o => o.value === multimediaObject.type)?.name} File</H6>
-                            </FormContainer>
-
-                            <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
-                                <FileInput
-                                    multiple={false}
-                                    onChange={handleFileChange}
-                                />
-                                <Box sx={{py: '12px'}}/>
-                                {file && <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={uploadFile}
-                                >
-                                    Upload
-                                </Button>}
-                            </Grid>
+                        <H6 sx={{mt: 4, mb: 2}}>Content</H6>
+                        <Grid container columnSpacing={6}>
+                            {type === multimediaTypes.Text ?
+                                <Grid item lg={12} md={12} sm={12} xs={12}>
+                                    <TextField
+                                        label="Text"
+                                        onChange={handleChange}
+                                        type="text"
+                                        name="data"
+                                        disabled={disabled}
+                                        multiline
+                                        minRows={3}
+                                        value={data || ''}
+                                    />
+                                </Grid>
+                                :
+                                <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
+                                    <FileInput
+                                        multiple={false}
+                                        disabled={disabled}
+                                        onChange={handleFileChange}
+                                    />
+                                    <Box sx={{py: '12px'}}/>
+                                    {file &&
+                                        <>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={uploadFile}
+                                            >
+                                                Upload
+                                            </Button>
+                                            <Box sx={{py: '12px'}}/>
+                                        </>}
+                                </Grid>
+                            }
                         </Grid>
                     </ValidatorForm>
                 </div>

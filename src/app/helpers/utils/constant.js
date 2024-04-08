@@ -4,7 +4,7 @@ export const navbarHeight = 60
 export const sidenavCompactWidth = 80
 export const containedLayoutWidth = 1200
 
-export const multimediaTypes = [
+export const multimediaTypesInput = [
     {name: "Image", value: "IMAGE"},
     {name: "Video", value: "VIDEO"},
     {name: "Audio", value: "AUDIO"},
@@ -18,4 +18,12 @@ export const multimediaTypesLookup = {
     AUDIO: "Audio",
     TEXT: "Text",
     MULTIDIMENSIONAL: "Multidimensional (3D-Objects)"
+};
+
+export const multimediaTypes = {
+    Image: "IMAGE",
+    Video: "VIDEO",
+    Audio: "AUDIO",
+    Text: "TEXT",
+    Multidimensional: "MULTIDIMENSIONAL"
 };

@@ -35,53 +35,21 @@ const DetailsForm = () => {
 
     const navigate = useNavigate();
     const [state, setState] = useState([]);
-    const [partnerOptions, setPartnerOptions] = useState([]);
-    const [partner, setPartner] = useState('');
     const {enqueueSnackbar} = useSnackbar();
 
-    React.useEffect(() => {
-        async function getPartnerOptions() {
-            axios.get(process.env.REACT_APP_BACKEND_URI + `/partner`)
-                .then((response) => {
-                    setPartnerOptions(response.data);
-                })
-                .catch((error) => {
-                    console.log(error);
-                })
-        }
-
-        getPartnerOptions();
-    }, []);
-
     const handleSave = () => {
-        async function saveCourse() {
-            const updatedCourseType = partner !== "" ? {
-                name: name,
-                rangeFrom: rangeFrom,
-                rangeTo: rangeTo,
-                partner: partner,
-                courses: [],
-                price: price,
-                discountPrice: discountPrice,
-                registration: registrationChecked,
-                defaultParticipantsLimit: defaultParticipantsLimit,
-                notes: notes,
-            } : {
-                name: name,
-                rangeFrom: rangeFrom,
-                rangeTo: rangeTo,
-                courses: [],
-                price: price,
-                discountPrice: discountPrice,
-                registration: registrationChecked,
-                defaultParticipantsLimit: defaultParticipantsLimit,
-                notes: notes,
+        async function saveTour() {
+            const updatedTour = {
+                title: title,
+                source: source,
+                multimediaObjects: [],
+                author: author
             };
 
-            axios.post(process.env.REACT_APP_BACKEND_URI + '/courseType', updatedCourseType)
+            axios.post(process.env.REACT_APP_BACKEND_URI + '/tours', updatedTour)
                 .then(() => {
-                    enqueueSnackbar('Erfolgreich erstellt!', {variant: 'success'});
-                    navigate('/courseTypes/overview');
+                    enqueueSnackbar('Created successfully!', {variant: 'success'});
+                    navigate('/tours');
                 })
                 .catch((error) => {
                     console.log(error);
@@ -89,7 +57,7 @@ const DetailsForm = () => {
                 });
         }
 
-        saveCourse();
+        saveTour();
     }
 
     const handleChange = (event) => {
@@ -100,32 +68,16 @@ const DetailsForm = () => {
         })
     }
 
-    const handleChangePartner = (event) => {
-        setPartner(event.target.value);
-    }
-
-    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setState({
-            ...state,
-            registrationChecked: event.target.checked,
-        })
-    };
-
     const {
-        name,
-        rangeFrom,
-        rangeTo,
-        notes,
-        price,
-        discountPrice,
-        defaultParticipantsLimit,
-        registrationChecked = true,
+        title,
+        source,
+        author,
     } = state
 
     return (
         <CardRoot elevation={6}>
             <CardTitle>
-                {'Kurstyp erstellen'}
+                {'Create Tour'}
             </CardTitle>
             <div>
                 <ValidatorForm onSubmit={handleSave} onError={() => {
@@ -134,125 +86,50 @@ const DetailsForm = () => {
                         <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
                             <TextField
                                 type="text"
-                                name="name"
+                                name="title"
                                 id="standard-basic"
                                 onChange={handleChange}
-                                value={name || ''}
+                                value={title || ''}
                                 validators={[
                                     'required',
                                 ]}
-                                label="Kurstyp Name"
+                                label="Tour Title"
                                 errorMessages={['this field is required']}
                             />
 
                             <TextField
-                                label="Jüngster Jahrgang"
+                                type="text"
+                                name="source"
+                                id="standard-basic"
                                 onChange={handleChange}
-                                type="number"
-                                name="rangeFrom"
-                                value={rangeFrom || ''}
-                                validators={['required']}
-                                errorMessages={['this field is required']}
-                            />
-
-                            <TextField
-                                label="Standard Teilnehmerlimit"
-                                onChange={handleChange}
-                                type="number"
-                                name="defaultParticipantsLimit"
-                                value={defaultParticipantsLimit || ''}
-                                validators={['required']}
+                                value={source || ''}
+                                validators={[
+                                    'required',
+                                ]}
+                                label="Source"
                                 errorMessages={['this field is required']}
                             />
                         </Grid>
 
                         <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
-                            <FormControl sx={{marginBottom: 2, minWidth: '100%'}}>
-                                <InputLabel id="select-helper-label">Sponsor</InputLabel>
-                                <Select
-                                    id='partner'
-                                    name='partner'
-                                    label="Sponsor"
-                                    value={partner || ''}
-                                    onChange={handleChangePartner}
-                                >
-                                    <MenuItem value={''}><b>Ohne Sponsor</b></MenuItem>
-                                    {partnerOptions.map(partnerOption => (
-                                        <MenuItem key={partnerOption._id}
-                                                  value={partnerOption._id}>{partnerOption.name}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-
                             <TextField
-                                label="Ältester Jahrgang"
+                                type="text"
+                                name="author"
+                                id="standard-basic"
                                 onChange={handleChange}
-                                type="number"
-                                name="rangeTo"
-                                value={rangeTo || ''}
-                                validators={['required']}
+                                value={author || ''}
+                                validators={[
+                                    'required',
+                                ]}
+                                label="Author"
                                 errorMessages={['this field is required']}
-                            />
-
-                            <TextField
-                                label="Preis (Monatlich)"
-                                onChange={handleChange}
-                                type="number"
-                                name="price"
-                                step="0.01"
-                                InputProps={{
-                                    endAdornment: <InputAdornment position="end">€</InputAdornment>,
-                                }}
-                                value={price || ''}
-                                validators={['required']}
-                                errorMessages={[
-                                    'this field is required',
-                                ]}
-                            />
-
-                            <TextField
-                                label="Geschwisterpreis (Monatlich)"
-                                onChange={handleChange}
-                                type="number"
-                                step="0.01"
-                                name="discountPrice"
-                                InputProps={{
-                                    endAdornment: <InputAdornment position="end">€</InputAdornment>,
-                                }}
-                                value={discountPrice || ''}
-                                validators={['required']}
-                                errorMessages={[
-                                    'this field is required',
-                                ]}
-                            />
-                        </Grid>
-
-                        <Grid item lg={12} md={12} sm={12} xs={12}>
-                            <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <TextField
-                                    label="Notizen"
-                                    onChange={handleChange}
-                                    type="text"
-                                    name="notes"
-                                    multiline
-                                    minRows={3}
-                                    value={notes || ''}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid item lg={6} md={6} sm={12} xs={12}>
-                            <FormControlLabel
-                                control={<Checkbox checked={registrationChecked}
-                                                   onChange={handleCheckboxChange}></Checkbox>}
-                                label="Registrierung möglich"
                             />
                         </Grid>
                     </Grid>
                     <Button color="primary" variant="contained" type="submit">
                         <Icon>add</Icon>
                         <Span sx={{pl: 1, textTransform: 'capitalize'}}>
-                            Erstellen
+                            Create
                         </Span>
                     </Button>
                 </ValidatorForm>

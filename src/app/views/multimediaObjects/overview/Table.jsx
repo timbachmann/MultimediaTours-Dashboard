@@ -23,14 +23,6 @@ const EnhancedTable = ({title, multimediaObjects}) => {
             field: 'date',
             title: 'Date',
             type: 'date',
-            render: rowData => {
-                const date = new Date(rowData.date)
-                return !isNaN(date) ? new Intl.DateTimeFormat('de', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                }).format(date) : '-'
-            }
         },
         {
             field: 'positionDetails',

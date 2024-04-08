@@ -62,9 +62,8 @@ const DetailsForm = ({title, userObject}) => {
 
     const handleSave = () => {
         async function saveUser() {
-            axios.put(process.env.REACT_APP_BACKEND_URI + `/user/${id}`, {
-                email: email
-            })
+            userObject.email = email;
+            axios.put(process.env.REACT_APP_BACKEND_URI + `/users/${id}`, userObject)
                 .then((response) => {
                     enqueueSnackbar('Erfolgreich gespeichert!', { variant: 'success' });
                     setDisabled(true);

@@ -5,7 +5,6 @@ import {authRoles} from "../../helpers/auth/authRoles";
 const AppUserTableOverview = Loadable(lazy(() => import("./user/overview/AppTable")));
 const AppUserDetail = Loadable(lazy(() => import("./user/detail/AppDetail")));
 const AppUserAdd = Loadable(lazy(() => import("./user/add/AppDetail")));
-const AppSettingsTableOverview = Loadable(lazy(() => import("./settings/overview/AppTable")));
 
 const adminRoutes = [
     {
@@ -19,11 +18,6 @@ const adminRoutes = [
     {
         path: '/admin/user/add',
         element: <AppUserAdd />,
-        auth: authRoles.admin
-    },
-    {
-        path: '/admin/settings',
-        element: <AppSettingsTableOverview />,
         auth: authRoles.admin
     },
 ]

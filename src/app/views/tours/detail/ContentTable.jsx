@@ -11,7 +11,7 @@ const ContentTable = ({title, tourId, multimediaObjectIds}) => {
 
     const handleAddObject = () => {
         navigate({
-            pathname: '/tours/addObject',
+            pathname: '/tours/editObjects',
             search: createSearchParams({
                 id: tourId
             }).toString()
@@ -84,15 +84,15 @@ const ContentTable = ({title, tourId, multimediaObjectIds}) => {
             actions={[
                 {
                     icon: EditIcon,
-                    tooltip: "Teilnehmer bearbeiten",
+                    tooltip: "Edit objects",
                     isFreeAction: true,
                     onClick: handleAddObject,
                 },
             ]}
             options={{
                 search: true,
+                maxColumnSort: 0,
                 filtering: true,
-                grouping: true,
                 searchFieldStyle: {
                     marginRight: '12px',
                 },

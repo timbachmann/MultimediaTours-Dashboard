@@ -66,6 +66,7 @@ const FileInput = (props) => {
             <FileUploadInput
                 type='file'
                 name='file'
+                disabled={props.disabled}
                 multiple={props.multiple}
                 onChange={handleFileInputChange}
             />
