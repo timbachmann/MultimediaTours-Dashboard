@@ -1,8 +1,8 @@
 import * as React from 'react';
 import MaterialTable, {MTableBodyRow} from "@material-table/core";
-import {H2} from "../../../helpers/components/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import {createSearchParams, useNavigate} from "react-router-dom";
+import {multimediaTypesLookup} from "../../../helpers/utils/constant";
 
 
 const EnhancedTable = ({title, multimediaObjects}) => {
@@ -12,6 +12,29 @@ const EnhancedTable = ({title, multimediaObjects}) => {
         {
             field: 'title',
             title: 'Title',
+            defaultSort: 'desc',
+        },
+        {
+            field: 'type',
+            title: 'Type',
+            lookup: multimediaTypesLookup
+        },
+        {
+            field: 'date',
+            title: 'Date',
+            type: 'date',
+            render: rowData => {
+                const date = new Date(rowData.date)
+                return !isNaN(date) ? new Intl.DateTimeFormat('de', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                }).format(date) : '-'
+            }
+        },
+        {
+            field: 'positionDetails',
+            title: 'Position',
         },
         {
             field: 'source',
@@ -31,14 +54,14 @@ const EnhancedTable = ({title, multimediaObjects}) => {
         navigate({
             pathname: '/multimedia-objects/detail',
             search: createSearchParams({
-                id: rowData._id
+                id: rowData.id
             }).toString()
         });
     }
 
     return (
         <MaterialTable
-            title={<H2>{title}</H2>}
+            title={title}
             style={{padding: '20px 24px', borderRadius: '8px'}}
             actions={[
                 {
@@ -55,9 +78,6 @@ const EnhancedTable = ({title, multimediaObjects}) => {
             }}
             options={{
                 search: false,
-                headerStyle: {
-                    fontSize: '18px',
-                },
                 paging: true,
                 pageSize: multimediaObjects.length,
                 pageSizeOptions: [],

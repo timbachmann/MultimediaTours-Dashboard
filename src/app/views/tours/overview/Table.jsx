@@ -20,6 +20,10 @@ const EnhancedTable = ({title, tours}) => {
             field: 'author',
             title: 'Author',
         },
+        {
+            field: 'numObjects',
+            title: 'Objects',
+        },
     ];
 
     const handleAdd = () => {
@@ -30,14 +34,14 @@ const EnhancedTable = ({title, tours}) => {
         navigate({
             pathname: '/tours/detail',
             search: createSearchParams({
-                id: rowData._id
+                id: rowData.id
             }).toString()
         });
     }
 
     return (
         <MaterialTable
-            title={<H2>{title}</H2>}
+            title={title}
             style={{padding: '20px 24px', borderRadius: '8px'}}
             actions={[
                 {
@@ -54,9 +58,6 @@ const EnhancedTable = ({title, tours}) => {
             }}
             options={{
                 search: false,
-                headerStyle: {
-                    fontSize: '18px',
-                },
                 paging: true,
                 pageSize: tours.length,
                 pageSizeOptions: [],

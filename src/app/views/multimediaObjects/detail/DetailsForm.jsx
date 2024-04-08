@@ -1,13 +1,13 @@
 import {
     Grid,
-    Card, Dialog, Button, InputAdornment, MenuItem, FormControl, FormControlLabel, Checkbox, CircularProgress,
+    Card, Dialog, Button, MenuItem, FormControl, Checkbox,
 } from '@mui/material'
-import {styled} from '@mui/system'
-import React, {useEffect, useState} from 'react'
+import {Box, styled} from '@mui/system'
+import React, {useState} from 'react'
 import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { DatePicker } from '@mui/x-date-pickers'
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns'
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider'
+import {DatePicker} from '@mui/x-date-pickers'
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
@@ -22,7 +22,9 @@ import {useSnackbar} from "notistack";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import {parseISO} from "date-fns";
-import {Email, NoteAdd} from "@mui/icons-material";
+import FileInput from "./FileUpload";
+import {H3, H6} from "../../../helpers/components/Typography";
+import {multimediaTypes} from "../../../helpers/utils/constant";
 
 const TextField = styled(TextValidator)(() => ({
     width: '100%',
@@ -37,60 +39,29 @@ const CardRoot = styled(Card)(() => ({
 const CardTitle = styled('div')(({subtitle}) => ({
     fontSize: '1rem',
     fontWeight: '500',
-    textTransform: 'capitalize',
     marginBottom: !subtitle && "16px",
     display: 'flex',
     justifyContent: 'space-between',
 }))
 
-const DetailsForm = ({title, camp}) => {
+const FormContainer = styled('div')(() => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+}))
+
+const DetailsForm = ({pageTitle, multimediaObject}) => {
     const [state, setState] = useState([])
     const [disabled, setDisabled] = useState(true)
     const navigate = useNavigate();
+    const [multimediaTypeOptions] = React.useState(multimediaTypes);
+    const [isPositionChecked, setIsPositionChecked] = useState(true);
     const [open, setOpen] = React.useState(false);
-    const [openCreateInvoice, setOpenCreateInvoice] = React.useState(false);
+    const [file, setFile] = React.useState(null);
     const {enqueueSnackbar} = useSnackbar();
-    const [activeChecked, setActiveChecked] = useState(false);
-    const [partnerOptions, setPartnerOptions] = React.useState([]);
-    const [invoicesInProgress, setInvoicesInProgress] = useState(false);
-    const [invoicesToCreate, setInvoicesToCreate] = React.useState(false);
-
-    useEffect(() => {
-        if (camp.active) {
-            setActiveChecked(camp.active);
-        }
-        if (camp.bookings) {
-            setInvoicesToCreate(camp.bookings.filter((i) => (i.invoice === undefined || i.invoice === "") && i.invoiceNeeded !== false).length > 0)
-        }
-    }, [camp.active, camp.bookings]);
-
-    React.useEffect(() => {
-        async function getPartnerOptions() {
-            axios.get(process.env.REACT_APP_BACKEND_URI + `/partner`)
-                .then((response) => {
-                    setPartnerOptions(response.data);
-                })
-                .catch((error) => {
-                    console.log(error);
-                })
-        }
-
-        getPartnerOptions();
-    }, []);
 
     const handleDelete = () => {
         setOpen(true);
-    };
-
-    const handleCreateInvoices = () => {
-        setOpenCreateInvoice(true);
-    };
-
-    const handleCloseCreateInvoice = (event, reason) => {
-        if (reason && reason === "backdropClick") {
-            return;
-        }
-        setOpenCreateInvoice(false);
     };
 
     const handleClose = () => {
@@ -98,73 +69,46 @@ const DetailsForm = ({title, camp}) => {
     };
 
     const handleSave = () => {
-        async function saveCamp() {
-            const updatedCamp = partner !== "" ? {
-                name: name,
-                partner: partner,
-                startDate: startDate,
-                endDate: endDate,
-                lunchPrice: lunchPrice,
-                campPrice: campPrice,
-                memberPrice: memberPrice,
-                active: activeChecked,
-                halfDayPrice: halfDayPrice,
-                halfDayMemberPrice: halfDayMemberPrice,
-                notes: notes,
-                invoicesCreated: invoicesCreated,
-                participantsLimit: participantsLimit,
-                waitingList: waitingList,
-                bookings: bookings,
-            } : {
-                name: name,
-                startDate: startDate,
-                endDate: endDate,
-                lunchPrice: lunchPrice,
-                campPrice: campPrice,
-                memberPrice: memberPrice,
-                active: activeChecked,
-                halfDayPrice: halfDayPrice,
-                halfDayMemberPrice: halfDayMemberPrice,
-                notes: notes,
-                invoicesCreated: invoicesCreated,
-                participantsLimit: participantsLimit,
-                waitingList: waitingList,
-                bookings: bookings,
-            };
-            axios.put(process.env.REACT_APP_BACKEND_URI + `/camp/${id}`, updatedCamp)
+        async function saveObject() {
+            const updatedMultimediaObject = {
+                type: type,
+                title: title,
+                date: date,
+                source: source,
+                position: {
+                    lat: latitude,
+                    lng: longitude,
+                    bearing: bearing,
+                    yaw: yaw,
+                },
+                data: data,
+                author: author,
+            }
+            axios.put(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${id}`, updatedMultimediaObject)
                 .then(() => {
                     setDisabled(true);
-                    enqueueSnackbar('Erfolgreich gespeichert!', { variant: 'success' });
+                    enqueueSnackbar('Erfolgreich gespeichert!', {variant: 'success'});
                 })
                 .catch((error) => {
                     console.log(error);
-                    enqueueSnackbar(error.error, { variant: 'error' });
+                    enqueueSnackbar(error.error, {variant: 'error'});
                 });
         }
 
-        saveCamp();
+        saveObject();
     }
 
-    const handleCheckboxChange = () => {
-        setActiveChecked(!activeChecked);
-    };
-
-    const handleCheckboxInitial = () => {
-        setActiveChecked(camp.active);
-    };
-
-    const handleStartDateChange = (startDate) => {
-        setState({...state, startDate})
-    }
-
-    const handleEndDateChange = (endDate) => {
-        setState({...state, endDate})
+    const handleDateChange = (date) => {
+        setState({...state, date})
     }
 
     const handleEdit = () => {
         setDisabled(false);
     }
 
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0])
+    }
 
     const handleChange = (event) => {
         event.persist()
@@ -174,16 +118,16 @@ const DetailsForm = ({title, camp}) => {
         })
     }
 
-    const handleChangePartner = (event) => {
+    const handleChangeType = (event) => {
         setState({
             ...state,
-            partner: event.target.value,
+            type: event.target.value,
         })
     }
 
-    const handleSendEmail = () => {
-        navigate(`/email/send?type=camp&id=${id}`)
-    }
+    const handleIsPositionCheckedChange = () => {
+        setIsPositionChecked(!isPositionChecked);
+    };
 
     const handleDeleteTrue = () => {
         async function deleteCamp() {
@@ -200,43 +144,40 @@ const DetailsForm = ({title, camp}) => {
         deleteCamp();
     };
 
-    const delay = async (ms) => {
-        return new Promise((resolve) =>
-            setTimeout(resolve, ms));
-    };
+    async function uploadFile() {
+        const formData = new FormData()
 
-    const handleCreateInvoicesTrue = async () => {
-        setInvoicesInProgress(true);
-        setInvoicesToCreate(false);
-        axios.post(process.env.REACT_APP_BACKEND_URI + `/invoice/camp/${id}`)
-            .then(async () => {
-                await delay(2000);
-                handleCloseCreateInvoice();
-                enqueueSnackbar('Erfolgreich erstellt!', {variant: 'success'});
-                window.open(`https://app.lexoffice.de/permalink/invoices/view/`, '_blank');
+        if(file !== undefined){
+            formData.append('attachments', file, file.name)
+        }
+
+        axios.post(process.env.REACT_APP_BACKEND_URI + "/file", formData)
+            .then(() => {
+                enqueueSnackbar("Datei erfolgreich hochgeladen!", {variant: 'success'})
+                navigate({
+                    pathname: '/dashboard'
+                })
             })
-            .catch((error) => {
-                console.log(error)
+            .catch((err) => {
+                console.log(err)
+                enqueueSnackbar("Ein Fehler ist aufgetreten: \n" + err.message, {variant: 'error'})
             })
+
     }
 
     const {
-        id = camp._id,
-        name = camp.name,
-        partner = camp.partner,
-        startDate = camp.startDate,
-        endDate = camp.endDate,
-        lunchPrice = camp.lunchPrice,
-        campPrice = camp.campPrice,
-        memberPrice = camp.memberPrice,
-        halfDayPrice = camp.halfDayPrice,
-        halfDayMemberPrice = camp.halfDayMemberPrice,
-        notes = camp.notes,
-        invoicesCreated = camp.invoicesCreated,
-        participantsLimit = camp.participantsLimit,
-        waitingList = camp.waitingList,
-        bookings = camp.bookings,
-
+        id = multimediaObject.id,
+        type = multimediaObject.type,
+        title = multimediaObject.title,
+        date = multimediaObject.date,
+        source = multimediaObject.source,
+        position = multimediaObject.position,
+        latitude = multimediaObject.position?.lat,
+        longitude = multimediaObject.position?.lng,
+        bearing = multimediaObject.position?.bearing,
+        yaw = multimediaObject.position?.yaw,
+        data = multimediaObject.data,
+        author = multimediaObject.author,
     } = state
 
     return (
@@ -246,59 +187,19 @@ const DetailsForm = ({title, camp}) => {
                 onClose={handleClose}
                 aria-labelledby="alert-dialog-title">
                 <DialogTitle id="alert-dialog-title">
-                    {"Camp löschen?"}
+                    {"Delete this object?"}
                 </DialogTitle>
                 <DialogActions>
-                    <Button onClick={handleClose}>Abbrechen</Button>
+                    <Button onClick={handleClose}>Cancel</Button>
                     <Button onClick={handleDeleteTrue} autoFocus>
-                        Löschen
+                        Delete
                     </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog
-                open={openCreateInvoice}
-                onClose={handleCloseCreateInvoice}
-                aria-labelledby="alert-dialog-title">
-                {invoicesInProgress ?
-                    <DialogTitle id="alert-dialog-title">
-                        {"Rechnungen werden erstellt..."}
-                    </DialogTitle>:
-                    <DialogTitle id="alert-dialog-title">
-                        {"Wirklich alle Rechnungen erstellen?"}
-                        <br/>
-                        {"Dies kann nicht rückgängig gemacht werden!"}
-                    </DialogTitle>
-                }
-                <DialogActions>
-                    {invoicesInProgress ?
-                        <CircularProgress
-                            sx={{margin: '0 16px 8px 28px'}}
-                            size={28}
-                            thickness={4}
-                        /> :
-                        <>
-                            <Button onClick={handleCloseCreateInvoice}>Abbrechen</Button>
-                            <Button onClick={handleCreateInvoicesTrue} autoFocus>
-                                ERSTELLEN
-                            </Button>
-                        </>
-                    }
                 </DialogActions>
             </Dialog>
             <CardRoot elevation={6}>
                 <CardTitle>
-                    {title}
+                    <H3>{pageTitle}</H3>
                     <div>
-                        <Tooltip title="E-Mail an Campteilnehmer senden" onClick={handleSendEmail}>
-                            <IconButton>
-                                <Email/>
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Rechnungen erstellen" hidden={!disabled} onClick={handleCreateInvoices}>
-                            <IconButton disabled={!disabled || !invoicesToCreate}>
-                                <NoteAdd/>
-                            </IconButton>
-                        </Tooltip>
                         {disabled ? <Tooltip title="Edit" onClick={handleEdit}>
                             <IconButton>
                                 <EditIcon/>
@@ -316,121 +217,42 @@ const DetailsForm = ({title, camp}) => {
                     </div>
                 </CardTitle>
                 <div>
-                    <ValidatorForm onSubmit={() => {}} onError={() => {}}>
+                    <ValidatorForm onSubmit={() => {
+                    }} onError={() => {
+                    }}>
                         <Grid container columnSpacing={6}>
                             <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
-                                <TextField
-                                    type="text"
-                                    name="name"
-                                    id="standard-basic"
-                                    onChange={handleChange}
-                                    value={name || ''}
-                                    disabled={disabled}
-                                    validators={[
-                                        'required',
-                                    ]}
-                                    label="Camp Name"
-                                    errorMessages={['this field is required']}
-                                />
-                                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={de}>
-                                    <DatePicker
-                                        value={parseISO(startDate)}
-                                        disabled={disabled}
-                                        label="Start"
-                                        sx={{mb: 2, width: '100%'}}
-                                        onChange={handleStartDateChange}
-                                        mask=""
-                                        textField={(props) => (
-                                            <TextField
-                                                {...props}
-                                                // variant="Outlined"
-                                                id="startDate"
-                                                label="Start"
-                                                disabled={disabled}
-                                                sx={{mb: 2, width: '100%'}}
-                                            />
-                                        )}
-                                    />
-                                </LocalizationProvider>
-
-                                <TextField
-                                    label="Preis für Mittagessen"
-                                    onChange={handleChange}
-                                    type="number"
-                                    name="lunchPrice"
-                                    step="0.01"
-                                    disabled={disabled}
-                                    value={lunchPrice || ''}
-                                    validators={['required']}
-                                    errorMessages={[
-                                        'this field is required',
-                                    ]}
-                                />
-
-                                <TextField
-                                    label="Teilnehmer-Limit"
-                                    onChange={handleChange}
-                                    type="number"
-                                    step="1"
-                                    name="participantsLimit"
-                                    disabled={disabled}
-                                    value={participantsLimit || ''}
-                                    validators={['required']}
-                                    errorMessages={[
-                                        'this field is required',
-                                    ]}
-                                />
-
-                                <TextField
-                                    label="Halbtagspreis"
-                                    onChange={handleChange}
-                                    type="number"
-                                    step="0.01"
-                                    name="halfDayPrice"
-                                    disabled={disabled}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">€</InputAdornment>,
-                                    }}
-                                    value={halfDayPrice || ''}
-                                    validators={['required']}
-                                    errorMessages={[
-                                        'this field is required',
-                                    ]}
-                                />
-                            </Grid>
-
-                            <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
-                                <FormControl sx={{ marginBottom: 2, minWidth: '100%' }}>
-                                    <InputLabel id="select-helper-label">Sponsor</InputLabel>
+                                <FormControl sx={{marginBottom: 2, minWidth: '100%'}}>
+                                    <InputLabel id="select-helper-label">Multimedia Type</InputLabel>
                                     <Select
-                                        id='partner'
-                                        name='partner'
-                                        label="Sponsor"
+                                        id='type'
+                                        name='type'
+                                        label="Multimedia Type"
                                         disabled={disabled}
-                                        value={partner || ''}
-                                        onChange={handleChangePartner}
+                                        value={type || ''}
+                                        onChange={handleChangeType}
                                     >
-                                        <MenuItem value={''}><b>Ohne Sponsor</b></MenuItem>
-                                        {partnerOptions.map(partnerOption => (
-                                            <MenuItem key={partnerOption._id} value={partnerOption._id}>{partnerOption.name}</MenuItem>
+                                        {multimediaTypeOptions.map(typeOption => (
+                                            <MenuItem key={typeOption.value}
+                                                      value={typeOption.value}>{typeOption.name}</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
 
                                 <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={de}>
                                     <DatePicker
-                                        value={parseISO(endDate)}
+                                        value={parseISO(date)}
                                         disabled={disabled}
-                                        label="Ende"
+                                        label="Date"
                                         sx={{mb: 2, width: '100%'}}
-                                        onChange={handleEndDateChange}
+                                        onChange={handleDateChange}
                                         mask=""
                                         textField={(props) => (
                                             <TextField
                                                 {...props}
                                                 // variant="Outlined"
-                                                id="endDate"
-                                                label="Ende"
+                                                id="date"
+                                                label="Date"
                                                 disabled={disabled}
                                                 sx={{mb: 2, width: '100%'}}
                                             />
@@ -439,50 +261,12 @@ const DetailsForm = ({title, camp}) => {
                                 </LocalizationProvider>
 
                                 <TextField
-                                    label="Camp-Preis"
+                                    label="Source"
                                     onChange={handleChange}
-                                    type="number"
-                                    step="0.01"
-                                    name="campPrice"
+                                    type="text"
+                                    name="source"
                                     disabled={disabled}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">€</InputAdornment>,
-                                    }}
-                                    value={campPrice || ''}
-                                    validators={['required']}
-                                    errorMessages={[
-                                        'this field is required',
-                                    ]}
-                                />
-
-                                <TextField
-                                    label="Mitglieder-Preis"
-                                    onChange={handleChange}
-                                    type="number"
-                                    step="0.01"
-                                    name="memberPrice"
-                                    disabled={disabled}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">€</InputAdornment>,
-                                    }}
-                                    value={memberPrice || ''}
-                                    validators={['required']}
-                                    errorMessages={[
-                                        'this field is required',
-                                    ]}
-                                />
-
-                                <TextField
-                                    label="Halbtagspreis Mitglieder"
-                                    onChange={handleChange}
-                                    type="number"
-                                    step="0.01"
-                                    name="halfDayMemberPrice"
-                                    disabled={disabled}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">€</InputAdornment>,
-                                    }}
-                                    value={halfDayMemberPrice || ''}
+                                    value={source || ''}
                                     validators={['required']}
                                     errorMessages={[
                                         'this field is required',
@@ -490,26 +274,120 @@ const DetailsForm = ({title, camp}) => {
                                 />
                             </Grid>
 
-                            <Grid item lg={12} md={12} sm={12} xs={12}>
-                                    <TextField
-                                        label="Notizen"
-                                        onChange={handleChange}
-                                        type="text"
-                                        disabled={disabled}
-                                        name="notes"
-                                        multiline
-                                        minRows={3}
-                                        value={notes || ''}
-                                    />
+                            <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
+                                <TextField
+                                    type="text"
+                                    name="title"
+                                    id="standard-basic"
+                                    onChange={handleChange}
+                                    value={title || ''}
+                                    disabled={disabled}
+                                    validators={[
+                                        'required',
+                                    ]}
+                                    label="Title"
+                                    errorMessages={['this field is required']}
+                                />
+
+                                <TextField
+                                    label="Author"
+                                    onChange={handleChange}
+                                    type="text"
+                                    name="author"
+                                    disabled={disabled}
+                                    value={author || ''}
+                                    validators={['required']}
+                                    errorMessages={[
+                                        'this field is required',
+                                    ]}
+                                />
                             </Grid>
 
-                            <Grid item lg={6} md={6} sm={12} xs={12}>
-                                <FormControlLabel
-                                    disabled={disabled}
-                                    control={<Checkbox onLoad={handleCheckboxInitial} checked={activeChecked}
-                                                       onChange={handleCheckboxChange}></Checkbox>}
-                                    label="Aktiv"
+                            <FormContainer sx={{mt: 4, mb: 2, pl: 7, width: '100%'}}>
+                                <H6>{'Position'}</H6>
+                                <Checkbox checked={isPositionChecked} onChange={handleIsPositionCheckedChange}/>
+                            </FormContainer>
+
+                            {isPositionChecked && (
+                                <Grid container columnSpacing={6} sx={{pl: 6}}>
+                                    <Grid item lg={6} md={6} sm={12} xs={12}>
+                                        <TextField
+                                            label="Latitude"
+                                            onChange={handleChange}
+                                            type="number"
+                                            step="0.000001"
+                                            name="latitude"
+                                            disabled={disabled}
+                                            value={latitude || ''}
+                                            validators={['required']}
+                                            errorMessages={[
+                                                'this field is required',
+                                            ]}
+                                        />
+                                    </Grid>
+                                    <Grid item lg={6} md={6} sm={12} xs={12}>
+                                        <TextField
+                                            label="Longitude"
+                                            onChange={handleChange}
+                                            type="number"
+                                            step="0.000001"
+                                            name="longitude"
+                                            disabled={disabled}
+                                            value={longitude || ''}
+                                            validators={['required']}
+                                            errorMessages={[
+                                                'this field is required',
+                                            ]}
+                                        />
+                                    </Grid>
+                                    <Grid item lg={6} md={6} sm={12} xs={12}>
+                                        <TextField
+                                            label="Bearing"
+                                            onChange={handleChange}
+                                            type="number"
+                                            name="bearing"
+                                            disabled={disabled}
+                                            value={bearing || ''}
+                                            validators={['required']}
+                                            errorMessages={[
+                                                'this field is required',
+                                            ]}
+                                        />
+                                    </Grid>
+                                    <Grid item lg={6} md={6} sm={12} xs={12}>
+                                        <TextField
+                                            label="Yaw"
+                                            onChange={handleChange}
+                                            type="number"
+                                            name="yaw"
+                                            disabled={disabled}
+                                            value={yaw || ''}
+                                            validators={['required']}
+                                            errorMessages={[
+                                                'this field is required',
+                                            ]}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            )}
+
+                            <FormContainer sx={{mt: 4, mb: 2, pl: 7, width: '100%'}}>
+                                <H6>{multimediaTypeOptions.find(o => o.value === multimediaObject.type)?.name} File</H6>
+                            </FormContainer>
+
+                            <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
+                                <FileInput
+                                    multiple={false}
+                                    onChange={handleFileChange}
                                 />
+                                <Box sx={{py: '12px'}}/>
+                                {file && <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={uploadFile}
+                                >
+                                    Upload
+                                </Button>}
                             </Grid>
                         </Grid>
                     </ValidatorForm>

@@ -44,7 +44,11 @@ const AppTable = () => {
                     ]}
                 />
             </div>
-            <EnhancedTable title="Tours" tours={tours}/>
+            <EnhancedTable title="Tours" tours={
+                tours.map(tour => {
+                    tour.numObjects = tour.multimediaObjects.length
+                    return tour
+                })}/>
         </Container>
     )
 }

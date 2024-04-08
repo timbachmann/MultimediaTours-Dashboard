@@ -3,8 +3,8 @@ import { Breadcrumb } from 'app/helpers/components'
 import {Box, styled} from '@mui/system'
 import {useSearchParams} from "react-router-dom";
 import DetailsForm from "./DetailsForm";
-import ParticipantsTable from "./ParticipantsTable";
 import axios from "../../../../axios";
+import ContentTable from "./ContentTable";
 
 const Container = styled('div')(({ theme }) => ({
     margin: '30px',
@@ -21,21 +21,21 @@ const Container = styled('div')(({ theme }) => ({
 
 const AppDetail = () => {
     const [searchParams] = useSearchParams();
-    const [camp, setCamp] = React.useState([]);
-    const [campParticipants, setCampParticipants] = React.useState([]);
+    const [tour, setTour] = React.useState([]);
+    const [multimediaObjects, setMultimediaObjects] = React.useState([]);
 
     React.useEffect(() => {
-        async function getCamp() {
-            axios.get(process.env.REACT_APP_BACKEND_URI + `/camp/${searchParams.get('id')}`)
+        async function getTour() {
+            axios.get(process.env.REACT_APP_BACKEND_URI + `/tours/${searchParams.get('id')}`)
                 .then((response) => {
-                    setCamp(response.data)
-                    setCampParticipants(response.data.bookings)
+                    setTour(response.data)
+                    setMultimediaObjects(response.data.multimediaObjects)
                 })
                 .catch((error) => {
                     console.log(error);
                 })
         }
-        getCamp();
+        getTour();
     }, [searchParams]);
 
     return (
@@ -43,15 +43,15 @@ const AppDetail = () => {
             <div className="breadcrumb">
                 <Breadcrumb
                     routeSegments={[
-                        { name: 'Camps', path: '/camps/overview'},
+                        { name: 'Tours', path: '/tours'},
                         { name: 'Details'}
                     ]}
                 />
             </div>
-            <DetailsForm title={camp.name} camp={camp}>
+            <DetailsForm pageTitle={tour.title} tour={tour}>
             </DetailsForm>
             <Box sx={{py: '12px'}}/>
-            <ParticipantsTable title='Teilnehmer/innen' campID={camp._id} campName={camp.name} bookings={campParticipants}/>
+            <ContentTable title='Multimedia Objects' tourId={tour.id} multimediaObjectIds={multimediaObjects} />
         </Container>
     )
 }

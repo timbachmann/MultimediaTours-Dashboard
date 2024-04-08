@@ -1,12 +1,11 @@
 import React from 'react'
-import { Breadcrumb } from 'app/helpers/components'
-import {Box, styled} from '@mui/system'
+import {Breadcrumb} from 'app/helpers/components'
+import {styled} from '@mui/system'
 import {useSearchParams} from "react-router-dom";
 import DetailsForm from "./DetailsForm";
-import ParticipantsTable from "./ParticipantsTable";
 import axios from "../../../../axios";
 
-const Container = styled('div')(({ theme }) => ({
+const Container = styled('div')(({theme}) => ({
     margin: '30px',
     [theme.breakpoints.down('sm')]: {
         margin: '16px',
@@ -21,20 +20,19 @@ const Container = styled('div')(({ theme }) => ({
 
 const AppDetail = () => {
     const [searchParams] = useSearchParams();
-    const [camp, setCamp] = React.useState([]);
-    const [campParticipants, setCampParticipants] = React.useState([]);
+    const [multimediaObject, setMultimediaObject] = React.useState([]);
 
     React.useEffect(() => {
         async function getCamp() {
-            axios.get(process.env.REACT_APP_BACKEND_URI + `/camp/${searchParams.get('id')}`)
+            axios.get(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${searchParams.get('id')}`)
                 .then((response) => {
-                    setCamp(response.data)
-                    setCampParticipants(response.data.bookings)
+                    setMultimediaObject(response.data)
                 })
                 .catch((error) => {
                     console.log(error);
                 })
         }
+
         getCamp();
     }, [searchParams]);
 
@@ -43,15 +41,13 @@ const AppDetail = () => {
             <div className="breadcrumb">
                 <Breadcrumb
                     routeSegments={[
-                        { name: 'Camps', path: '/camps/overview'},
-                        { name: 'Details'}
+                        {name: 'Multimedia Objects', path: '/multimedia-objects'},
+                        {name: 'Details'}
                     ]}
                 />
             </div>
-            <DetailsForm title={camp.name} camp={camp}>
+            <DetailsForm pageTitle={multimediaObject.title} multimediaObject={multimediaObject}>
             </DetailsForm>
-            <Box sx={{py: '12px'}}/>
-            <ParticipantsTable title='Teilnehmer/innen' campID={camp._id} campName={camp.name} bookings={campParticipants}/>
         </Container>
     )
 }

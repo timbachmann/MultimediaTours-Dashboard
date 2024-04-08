@@ -44,7 +44,12 @@ const AppTable = () => {
                     ]}
                 />
             </div>
-            <EnhancedTable title={"Multimedia Objects"} multimediaObjects={multimediaObjects}/>
+            <EnhancedTable title={"Multimedia Objects"} multimediaObjects={
+                multimediaObjects.map(m => {
+                    m.positionDetails = m.position ? `${m.position.lat}, ${m.position.lng}` : '-'
+                    return m
+                })
+            }/>
         </Container>
     )
 }

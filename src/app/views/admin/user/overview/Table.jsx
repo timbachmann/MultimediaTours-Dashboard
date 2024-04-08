@@ -142,9 +142,6 @@ const NewsletterTable = ({title}) => {
                         exportFunc: (cols, datas) => ExportCsv(cols, datas, `${title}`),
                     }
                 ],
-                headerStyle: {
-                    paddingRight: '8px',
-                },
                 pageSize: user.length < 20 ? user.length : 20,
                 pageSizeOptions: [5, 10, 20, 50, { value: user.length, label: "Alle anzeigen" }]
             }}
