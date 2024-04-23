@@ -54,39 +54,58 @@ const DetailsForm = () => {
     const [file, setFile] = React.useState(null);
 
     const handleSave = () => {
-        async function saveObject() {
-            const updatedMultimediaObject = {
-                type: type,
-                title: title,
-                date: date,
-                source: source,
-                data: data,
-                author: author,
-                ...{
-                    ...isPositionChecked &&
-                    {
-                        position: {
-                            lat: latitude,
-                            lng: longitude,
-                            bearing: bearing,
-                            yaw: yaw,
-                        }
-                    }
+        let updatedMultimediaObject = {
+            type: type,
+            title: title,
+            date: date,
+            source: source,
+            data: data,
+            author: author,
+            ...isPositionChecked &&
+            {
+                position: {
+                    lat: latitude,
+                    lng: longitude,
+                    bearing: bearing,
+                    yaw: yaw,
                 }
             }
+        }
 
-            axios.post(process.env.REACT_APP_BACKEND_URI + '/multimedia-objects', updatedMultimediaObject)
-                .then(() => {
-                    enqueueSnackbar('Created successfully!', {variant: 'success'});
-                    navigate('/multimedia-objects');
+        if (type === multimediaTypes.Text) {
+            saveObject(updatedMultimediaObject);
+        } else {
+            const formData = new FormData()
+            formData.append('file', file, file.name)
+
+            const requestConfig = {
+                headers: {
+                    'content-type': 'multipart/form-data'
+                }
+            };
+
+            axios.post(process.env.REACT_APP_BACKEND_URI + '/multimedia-objects/upload', formData, requestConfig)
+                .then((response) => {
+                    updatedMultimediaObject.data = response.data;
+                    saveObject(updatedMultimediaObject);
                 })
                 .catch((error) => {
                     console.log(error);
                     enqueueSnackbar(error.error, {variant: 'error'});
                 });
         }
+    }
 
-        saveObject();
+    async function saveObject(updatedMultimediaObject) {
+        axios.post(process.env.REACT_APP_BACKEND_URI + '/multimedia-objects', updatedMultimediaObject)
+            .then(() => {
+                enqueueSnackbar('Created successfully!', {variant: 'success'});
+                navigate('/multimedia-objects');
+            })
+            .catch((error) => {
+                console.log(error);
+                enqueueSnackbar(error.error, {variant: 'error'});
+            });
     }
 
     const handleDateChange = (date) => {
@@ -115,27 +134,6 @@ const DetailsForm = () => {
     const handleIsPositionCheckedChange = () => {
         setIsPositionChecked(!isPositionChecked);
     };
-
-    async function uploadFile() {
-        const formData = new FormData()
-
-        if (file !== undefined) {
-            formData.append('attachments', file, file.name)
-        }
-
-        axios.post(process.env.REACT_APP_BACKEND_URI + "/file", formData)
-            .then(() => {
-                enqueueSnackbar("Uploaded successfully!", {variant: 'success'})
-                navigate({
-                    pathname: '/dashboard'
-                })
-            })
-            .catch((err) => {
-                console.log(err)
-                enqueueSnackbar("Ein Fehler ist aufgetreten: \n" + err.message, {variant: 'error'})
-            })
-
-    }
 
     const {
         type,
@@ -321,17 +319,6 @@ const DetailsForm = () => {
                                     onChange={handleFileChange}
                                 />
                                 <Box sx={{py: '12px'}}/>
-                                {file &&
-                                    <>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={uploadFile}
-                                        >
-                                            Upload
-                                        </Button>
-                                        <Box sx={{py: '12px'}}/>
-                                    </>}
                             </Grid>
                         }
 

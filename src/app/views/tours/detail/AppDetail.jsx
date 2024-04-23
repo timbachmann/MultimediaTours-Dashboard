@@ -51,7 +51,7 @@ const AppDetail = () => {
             <DetailsForm pageTitle={tour.title} tour={tour}>
             </DetailsForm>
             <Box sx={{py: '12px'}}/>
-            <ContentTable title='Multimedia Objects' tourId={tour.id} multimediaObjectIds={multimediaObjects} />
+            <ContentTable title='Multimedia Objects' tour={tour} multimediaObjectIds={multimediaObjects} />
         </Container>
     )
 }

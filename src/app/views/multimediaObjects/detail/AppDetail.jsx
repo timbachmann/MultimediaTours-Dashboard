@@ -4,6 +4,7 @@ import {styled} from '@mui/system'
 import {useSearchParams} from "react-router-dom";
 import DetailsForm from "./DetailsForm";
 import axios from "../../../../axios";
+import {multimediaTypes} from "../../../helpers/utils/constant";
 
 const Container = styled('div')(({theme}) => ({
     margin: '30px',
@@ -20,21 +21,36 @@ const Container = styled('div')(({theme}) => ({
 
 const AppDetail = () => {
     const [searchParams] = useSearchParams();
-    const [multimediaObject, setMultimediaObject] = React.useState([]);
+    const [multimediaObject, setMultimediaObject] = React.useState({});
+    const [multimediaObjectFile, setMultimediaObjectFile] = React.useState(undefined);
 
     React.useEffect(() => {
-        async function getCamp() {
-            axios.get(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${searchParams.get('id')}`)
-                .then((response) => {
-                    setMultimediaObject(response.data)
-                })
-                .catch((error) => {
-                    console.log(error);
-                })
-        }
-
-        getCamp();
+        getMultimediaObject();
     }, [searchParams]);
+
+    function getMultimediaObject() {
+        axios.get(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${searchParams.get('id')}`)
+            .then((response) => {
+                setMultimediaObject(response.data)
+                if (response.data.type !== multimediaTypes.Text) {
+                    getMultimediaObjectFile()
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+    }
+
+    function getMultimediaObjectFile() {
+        axios.get(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${searchParams.get('id')}/object`, {responseType: 'blob'})
+            .then((response) => {
+                const url = URL.createObjectURL(response.data)
+                setMultimediaObjectFile(url)
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+    }
 
     return (
         <Container>
@@ -46,7 +62,8 @@ const AppDetail = () => {
                     ]}
                 />
             </div>
-            <DetailsForm pageTitle={multimediaObject.title} multimediaObject={multimediaObject}>
+            <DetailsForm pageTitle={multimediaObject.title} multimediaObject={multimediaObject}
+                         updateData={getMultimediaObject} multimediaObjectFile={multimediaObjectFile}>
             </DetailsForm>
         </Container>
     )

@@ -50,7 +50,7 @@ const FormContainer = styled('div')(() => ({
     justifyContent: 'flex-start',
 }))
 
-const DetailsForm = ({pageTitle, multimediaObject}) => {
+const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectFile}) => {
     const [state, setState] = useState([])
     const [disabled, setDisabled] = useState(true)
     const navigate = useNavigate();
@@ -75,38 +75,59 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
     };
 
     const handleSave = () => {
-        async function saveObject() {
-            const updatedMultimediaObject = {
-                type: type,
-                title: title,
-                date: date,
-                source: source,
-                data: data,
-                author: author,
-                ...{
-                    ...isPositionChecked &&
-                    {
-                        position: {
-                            lat: latitude,
-                            lng: longitude,
-                            bearing: bearing,
-                            yaw: yaw,
-                        }
-                    }
+        const updatedMultimediaObject = {
+            type: type,
+            title: title,
+            date: date,
+            source: source,
+            data: data,
+            author: author,
+            ...(isPositionChecked &&
+            {
+                position: {
+                    lat: latitude,
+                    lng: longitude,
+                    bearing: bearing,
+                    yaw: yaw,
                 }
-            }
-            axios.put(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${id}`, updatedMultimediaObject)
-                .then(() => {
-                    setDisabled(true);
-                    enqueueSnackbar('Saved successfully!', {variant: 'success'});
+            })
+        }
+
+        if (type === multimediaTypes.Text || file === null) {
+            saveObject(updatedMultimediaObject);
+        } else {
+            const formData = new FormData()
+            formData.append('file', file, file.name)
+
+            const requestConfig = {
+                headers: {
+                    'content-type': 'multipart/form-data'
+                }
+            };
+
+            axios.post(process.env.REACT_APP_BACKEND_URI + '/multimedia-objects/upload', formData, requestConfig)
+                .then((response) => {
+                    updatedMultimediaObject.data = response.data;
+                    saveObject(updatedMultimediaObject);
                 })
                 .catch((error) => {
                     console.log(error);
                     enqueueSnackbar(error.error, {variant: 'error'});
                 });
         }
+    }
 
-        saveObject();
+    function saveObject(updatedMultimediaObject) {
+        axios.put(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${id}`, updatedMultimediaObject)
+            .then(() => {
+                updateData();
+                setDisabled(true);
+                enqueueSnackbar('Saved successfully!', {variant: 'success'});
+            })
+            .catch((error) => {
+                console.log(error);
+                enqueueSnackbar(error.error, {variant: 'error'});
+            });
     }
 
     const handleDateChange = (date) => {
@@ -155,27 +176,6 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
         deleteObject();
     };
 
-    async function uploadFile() {
-        const formData = new FormData()
-
-        if(file !== undefined){
-            formData.append('attachments', file, file.name)
-        }
-
-        axios.post(process.env.REACT_APP_BACKEND_URI + "/file", formData)
-            .then(() => {
-                enqueueSnackbar("Uploaded successfully!", {variant: 'success'})
-                navigate({
-                    pathname: '/dashboard'
-                })
-            })
-            .catch((err) => {
-                console.log(err)
-                enqueueSnackbar("Ein Fehler ist aufgetreten: \n" + err.message, {variant: 'error'})
-            })
-
-    }
-
     const {
         id = multimediaObject.id,
         type = multimediaObject.type,
@@ -189,6 +189,48 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
         data = multimediaObject.data,
         author = multimediaObject.author,
     } = state
+
+    const renderFile = (type, file) => {
+        if (!multimediaObjectFile) {
+            return undefined;
+        }
+        switch(type) {
+            case multimediaTypes.Image:
+                return (
+                    <Grid item lg={6} md={6} sm={12} xs={12} style={{display: 'flex', justifyContent: 'flex-start'}}>
+                        <img src={file} style={{
+                            width: '100%',
+                            objectFit: 'contain',
+                            border: '1px solid #bbbbbb',
+                            borderRadius: '6px'
+                        }} alt={multimediaObject.title}/>
+                    </Grid>
+                );
+            case multimediaTypes.Video:
+                return (
+                    <Grid item lg={6} md={6} sm={12} xs={12} style={{display: 'flex', justifyContent: 'flex-start'}}>
+                        <video src={file} controls style={{
+                            width: '100%',
+                            objectFit: 'contain',
+                            border: '1px solid #bbbbbb',
+                            borderRadius: '6px'
+                        }}/>
+                    </Grid>
+                )
+            case multimediaTypes.Audio:
+                return (
+                    <Grid item lg={12} md={12} sm={12} xs={12} style={{display: 'flex', justifyContent: 'center'}}>
+                        <audio src={file} controls style={{
+                            width: '100%',
+                            objectFit: 'contain',
+                            borderRadius: '6px',
+                        }}/>
+                    </Grid>
+                )
+            default:
+                return undefined;
+        }
+    }
 
     return (
         <div>
@@ -384,7 +426,8 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
 
                         <H6 sx={{mt: 4, mb: 2}}>Content</H6>
                         <Grid container columnSpacing={6}>
-                            {type === multimediaTypes.Text ?
+                            {renderFile(multimediaObject.type, multimediaObjectFile)}
+                            {type === multimediaTypes.Text && (
                                 <Grid item lg={12} md={12} sm={12} xs={12}>
                                     <TextField
                                         label="Text"
@@ -397,26 +440,18 @@ const DetailsForm = ({pageTitle, multimediaObject}) => {
                                         value={data || ''}
                                     />
                                 </Grid>
-                                :
-                                <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
-                                    <FileInput
-                                        multiple={false}
-                                        disabled={disabled}
-                                        onChange={handleFileChange}
-                                    />
-                                    <Box sx={{py: '12px'}}/>
-                                    {file &&
-                                        <>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={uploadFile}
-                                            >
-                                                Upload
-                                            </Button>
-                                            <Box sx={{py: '12px'}}/>
-                                        </>}
-                                </Grid>
+                            )}
+                            {!disabled && (
+                                type !== multimediaTypes.Text &&
+                                    <Grid item lg={6} md={6} sm={12} xs={12} sx={{mt: 2}}>
+                                        <FileInput
+                                            multiple={false}
+                                            disabled={disabled}
+                                            onChange={handleFileChange}
+                                        />
+                                        <Box sx={{py: '12px'}}/>
+                                    </Grid>
+                                )
                             }
                         </Grid>
                     </ValidatorForm>
