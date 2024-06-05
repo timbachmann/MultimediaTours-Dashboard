@@ -82,6 +82,7 @@ const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectF
             source: source,
             data: data,
             author: author,
+            tags: tags,
             ...(isPositionChecked &&
             {
                 position: {
@@ -105,7 +106,7 @@ const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectF
                 }
             };
 
-            axios.post(process.env.REACT_APP_BACKEND_URI + '/multimedia-objects/upload', formData, requestConfig)
+            axios.post(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/upload/${id}`, formData, requestConfig)
                 .then((response) => {
                     updatedMultimediaObject.data = response.data;
                     saveObject(updatedMultimediaObject);
@@ -182,6 +183,7 @@ const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectF
         title = multimediaObject.title,
         date = multimediaObject.date,
         source = multimediaObject.source,
+        tags = multimediaObject.tags,
         latitude = multimediaObject.position?.lat,
         longitude = multimediaObject.position?.lng,
         bearing = multimediaObject.position?.bearing,

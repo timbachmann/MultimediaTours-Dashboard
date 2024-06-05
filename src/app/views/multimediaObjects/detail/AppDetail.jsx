@@ -42,7 +42,7 @@ const AppDetail = () => {
     }
 
     function getMultimediaObjectFile() {
-        axios.get(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${searchParams.get('id')}/object`, {responseType: 'blob'})
+        axios.get(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/file/${searchParams.get('id')}`, {responseType: 'blob'})
             .then((response) => {
                 const url = URL.createObjectURL(response.data)
                 setMultimediaObjectFile(url)
