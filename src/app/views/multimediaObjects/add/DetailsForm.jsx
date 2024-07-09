@@ -54,6 +54,9 @@ const DetailsForm = () => {
     const [file, setFile] = React.useState(null);
 
     const handleSave = () => {
+        const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase());
+        const uniqueTags = [...new Set(tagsArray)]
+
         let updatedMultimediaObject = {
             type: type,
             title: title,
@@ -61,6 +64,7 @@ const DetailsForm = () => {
             source: source,
             data: data,
             author: author,
+            tags: uniqueTags,
             ...isPositionChecked &&
             {
                 position: {
@@ -71,36 +75,45 @@ const DetailsForm = () => {
                 }
             }
         }
-
-        if (type === multimediaTypes.Text) {
-            saveObject(updatedMultimediaObject);
-        } else {
-            const formData = new FormData()
-            formData.append('file', file, file.name)
-
-            const requestConfig = {
-                headers: {
-                    'content-type': 'multipart/form-data'
-                }
-            };
-
-            axios.post(process.env.REACT_APP_BACKEND_URI + '/multimedia-objects/upload', formData, requestConfig)
-                .then((response) => {
-                    updatedMultimediaObject.data = response.data;
-                    saveObject(updatedMultimediaObject);
-                })
-                .catch((error) => {
-                    console.log(error);
-                    enqueueSnackbar(error.error, {variant: 'error'});
-                });
-        }
+        saveObject(updatedMultimediaObject, type !== multimediaTypes.Text);
     }
 
-    async function saveObject(updatedMultimediaObject) {
+    async function saveObject(updatedMultimediaObject, uploadFile = false) {
+        updatedMultimediaObject.data = "";
         axios.post(process.env.REACT_APP_BACKEND_URI + '/multimedia-objects', updatedMultimediaObject)
-            .then(() => {
-                enqueueSnackbar('Created successfully!', {variant: 'success'});
-                navigate('/multimedia-objects');
+            .then((response) => {
+                if (!uploadFile) {
+                    enqueueSnackbar('Created successfully!', {variant: 'success'});
+                    navigate('/multimedia-objects');
+                } else {
+                    const formData = new FormData()
+                    formData.append('file', file, file.name)
+
+                    const requestConfig = {
+                        headers: {
+                            'content-type': 'multipart/form-data'
+                        }
+                    };
+
+                    const id = response.data;
+                    axios.post(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/upload/${id}`, formData, requestConfig)
+                        .then((response) => {
+                            updatedMultimediaObject.data = response.data;
+                            axios.put(process.env.REACT_APP_BACKEND_URI + `/multimedia-objects/${id}`, updatedMultimediaObject)
+                                .then((response) => {
+                                    enqueueSnackbar('Created successfully!', {variant: 'success'});
+                                    navigate('/multimedia-objects');
+                                })
+                                .catch((error) => {
+                                    console.log(error);
+                                    enqueueSnackbar(error.error, {variant: 'error'});
+                                });
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                            enqueueSnackbar(error.error, {variant: 'error'});
+                        });
+                }
             })
             .catch((error) => {
                 console.log(error);
@@ -146,6 +159,7 @@ const DetailsForm = () => {
         yaw,
         data,
         author,
+        tags
     } = state
 
     return (
@@ -296,6 +310,19 @@ const DetailsForm = () => {
                                 </Grid>
                             </Grid>
                         )}
+                    </Grid>
+
+                    <H6 sx={{mt: 4, mb: 2}}>Tags</H6>
+                    <Grid container columnSpacing={6}>
+                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                            <TextField
+                                label="Enter tags separated with a comma, e.g. architecture,buildings,..."
+                                onChange={handleChange}
+                                type="text"
+                                name="tags"
+                                value={tags || ''}
+                            />
+                        </Grid>
                     </Grid>
 
                     <H6 sx={{mt: 4, mb: 2}}>Content</H6>

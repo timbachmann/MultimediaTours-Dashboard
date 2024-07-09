@@ -75,6 +75,8 @@ const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectF
     };
 
     const handleSave = () => {
+        const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase());
+        const uniqueTags = [...new Set(tagsArray)]
         const updatedMultimediaObject = {
             type: type,
             title: title,
@@ -82,7 +84,7 @@ const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectF
             source: source,
             data: data,
             author: author,
-            tags: tags,
+            tags: uniqueTags,
             ...(isPositionChecked &&
             {
                 position: {
@@ -424,6 +426,20 @@ const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectF
                                     </Grid>
                                 </Grid>
                             )}
+                        </Grid>
+
+                        <H6 sx={{mt: 4, mb: 2}}>Tags</H6>
+                        <Grid container columnSpacing={6}>
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <TextField
+                                    label="Enter tags separated with a comma, e.g. architecture,buildings,..."
+                                    onChange={handleChange}
+                                    type="text"
+                                    name="tags"
+                                    disabled={disabled}
+                                    value={tags || ''}
+                                />
+                            </Grid>
                         </Grid>
 
                         <H6 sx={{mt: 4, mb: 2}}>Content</H6>

@@ -13,7 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "../../../../axios";
 import {useNavigate} from "react-router-dom";
 import {useSnackbar} from "notistack";
-import {H3} from "../../../helpers/components/Typography";
+import {H3, H6} from "../../../helpers/components/Typography";
 
 const TextField = styled(TextValidator)(() => ({
     width: '100%',
@@ -42,12 +42,17 @@ const DetailsForm = ({pageTitle, tour}) => {
 
     const handleSave = () => {
         async function saveTour() {
+            const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase());
+            const uniqueTags = [...new Set(tagsArray)]
+
             const updatedTour = {
-                title,
-                source,
-                multimediaObjects,
-                author
+                title: title,
+                source: source,
+                multimediaObjects: multimediaObjects,
+                author: author,
+                tags: uniqueTags
             };
+
             axios.put(process.env.REACT_APP_BACKEND_URI + `/tours/${id}`, updatedTour)
                 .then(() => {
                     setDisabled(true);
@@ -92,6 +97,7 @@ const DetailsForm = ({pageTitle, tour}) => {
         source = tour.source,
         multimediaObjects = tour.multimediaObjects,
         author = tour.author,
+        tags = tour.tags,
     } = state
 
     return (
@@ -162,6 +168,20 @@ const DetailsForm = ({pageTitle, tour}) => {
                                     ]}
                                     label="Author"
                                     errorMessages={['this field is required']}
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <H6 sx={{mt: 4, mb: 2}}>Tags</H6>
+                        <Grid container columnSpacing={6}>
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <TextField
+                                    label="Enter tags separated with a comma, e.g. architecture,buildings,..."
+                                    onChange={handleChange}
+                                    type="text"
+                                    name="tags"
+                                    disabled={disabled}
+                                    value={tags || ''}
                                 />
                             </Grid>
                         </Grid>

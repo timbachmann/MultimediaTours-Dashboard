@@ -23,8 +23,8 @@ const AppDetail = () => {
             <div className="breadcrumb">
                 <Breadcrumb
                     routeSegments={[
-                        { name: 'Kurstypen', path: '/courseTypes/overview'},
-                        { name: 'Kurstyp hinzufügen'}
+                        { name: 'Tours', path: '/tours'},
+                        { name: 'Create New'}
                     ]}
                 />
             </div>

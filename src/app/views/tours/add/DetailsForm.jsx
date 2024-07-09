@@ -6,7 +6,7 @@ import {styled} from '@mui/system'
 import React, {useState} from 'react'
 import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator'
 import axios from "../../../../axios";
-import {Span} from "../../../helpers/components/Typography";
+import {H6, Span} from "../../../helpers/components/Typography";
 import {useNavigate} from "react-router-dom";
 import {useSnackbar} from "notistack";
 
@@ -37,11 +37,15 @@ const DetailsForm = () => {
 
     const handleSave = () => {
         async function saveTour() {
+            const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase());
+            const uniqueTags = [...new Set(tagsArray)]
+
             const updatedTour = {
                 title: title,
                 source: source,
                 multimediaObjects: [],
-                author: author
+                author: author,
+                tags: uniqueTags
             };
 
             axios.post(process.env.REACT_APP_BACKEND_URI + '/tours', updatedTour)
@@ -70,6 +74,7 @@ const DetailsForm = () => {
         title,
         source,
         author,
+        tags
     } = state
 
     return (
@@ -124,6 +129,20 @@ const DetailsForm = () => {
                             />
                         </Grid>
                     </Grid>
+
+                    <H6 sx={{mt: 4, mb: 2}}>Tags</H6>
+                    <Grid container columnSpacing={6}>
+                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                            <TextField
+                                label="Enter tags separated with a comma, e.g. architecture,buildings,..."
+                                onChange={handleChange}
+                                type="text"
+                                name="tags"
+                                value={tags || ''}
+                            />
+                        </Grid>
+                    </Grid>
+
                     <Button color="primary" variant="contained" type="submit">
                         <Icon>add</Icon>
                         <Span sx={{pl: 1, textTransform: 'capitalize'}}>
