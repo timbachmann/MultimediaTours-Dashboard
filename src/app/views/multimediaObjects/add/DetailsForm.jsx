@@ -54,7 +54,7 @@ const DetailsForm = () => {
     const [file, setFile] = React.useState(null);
 
     const handleSave = () => {
-        const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase());
+        const tagsArray = tags === undefined ? [] : tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase());
         const uniqueTags = [...new Set(tagsArray)]
 
         let updatedMultimediaObject = {

@@ -75,7 +75,7 @@ const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectF
     };
 
     const handleSave = () => {
-        const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase());
+        const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase().trim());
         const uniqueTags = [...new Set(tagsArray)]
         const updatedMultimediaObject = {
             type: type,
@@ -185,7 +185,7 @@ const DetailsForm = ({pageTitle, multimediaObject, updateData, multimediaObjectF
         title = multimediaObject.title,
         date = multimediaObject.date,
         source = multimediaObject.source,
-        tags = multimediaObject.tags,
+        tags = multimediaObject.tags === undefined ? "" : multimediaObject.tags.join(","),
         latitude = multimediaObject.position?.lat,
         longitude = multimediaObject.position?.lng,
         bearing = multimediaObject.position?.bearing,

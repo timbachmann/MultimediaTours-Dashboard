@@ -42,9 +42,11 @@ const DetailsForm = ({pageTitle, tour}) => {
 
     const handleSave = () => {
         async function saveTour() {
-            const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase());
+            console.log(tags.type)
+            const tagsArray = tags.split(",").filter((tag) => tag.length > 0).map((tag) => tag.toLowerCase().trim());
             const uniqueTags = [...new Set(tagsArray)]
 
+            console.log(uniqueTags)
             const updatedTour = {
                 title: title,
                 source: source,
@@ -97,7 +99,7 @@ const DetailsForm = ({pageTitle, tour}) => {
         source = tour.source,
         multimediaObjects = tour.multimediaObjects,
         author = tour.author,
-        tags = tour.tags,
+        tags = tour.tags === undefined ? "" : tour.tags.join(","),
     } = state
 
     return (
